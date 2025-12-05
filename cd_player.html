@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Demon Slayer Music Box</title>
+  <!-- Import bold, modern fonts for a Jujutsu Kaisen-inspired vibe -->
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="cd_player.css">
+</head>
+<body>
+  <div id="player-container">
+    <div id="player-header">My Music Box</div>
+    <div id="search-bar">
+      <input type="text" id="search-input" placeholder="Search for a song...">
+    </div>
+    <div id="song-list"></div>
+    <div id="main">
+      <div id="cd-wrapper">
+        <div id="cd"></div>
+      </div>
+      <div id="lyrics-container">
+        <div id="song-title">Select a song</div>
+        <div id="lyrics"></div>
+      </div>
+    </div>
+    <div id="controls">
+      <button id="prev-btn" class="control-button">⏮</button>
+      <button id="play-btn" class="control-button">▶</button>
+      <button id="next-btn" class="control-button">⏭</button>
+      <button id="replay-btn" class="control-button"> <img width="25" height="25" src="https://img.icons8.com/parakeet-line/48/repeat.png" alt="repeat"/> </button>
+    </div>
+  </div>
+  <!-- Hidden audio element used for playback -->
+  <audio id="audio-player"></audio>
+
+  <script src="cd_player.js"></script>
+</body>
+</html>
