@@ -186,13 +186,24 @@ function loadSong(index) {
 // Update background images based on the current song
 function updateBackground(imagePath) {
     const imageUrl = `url('${imagePath}')`;
-    // Layer album art under the gradient to keep contrast
-    document.body.style.backgroundImage =
-        `linear-gradient(135deg, rgba(11, 10, 22, 0.92), rgba(18, 13, 36, 0.9)), ${imageUrl}`;
-    document.body.style.backgroundSize = 'cover';
-    document.body.style.backgroundBlendMode = 'overlay';
     const playerContainer = document.getElementById('player-container');
+    const isMobile = window.matchMedia('(max-width: 768px)').matches;
+
+    if (isMobile) {
+    // Keep the mobile view clean: rely on the CSS gradients and avoid busy art behind text
+    document.body.style.backgroundImage = '';
     playerContainer.style.backgroundImage = '';
+    } else {
+    // Laptop/desktop: bring back the album art for body and box
+    document.body.style.backgroundImage = imageUrl;
+    document.body.style.backgroundSize = 'contain'; // show full image
+    document.body.style.backgroundRepeat = 'repeat-x'; // place a second copy alongside
+    document.body.style.backgroundPosition = 'center center';
+    playerContainer.style.backgroundImage = `linear-gradient(135deg, rgba(18, 13, 36, 0.55), rgba(21, 15, 44, 0.6)), ${imageUrl}`;
+    playerContainer.style.backgroundSize = 'cover';
+    playerContainer.style.backgroundPosition = 'center';
+    }
+
     // Also show the art on the disc itself
     cd.style.backgroundImage = imageUrl;
     cd.style.backgroundSize = 'cover';
