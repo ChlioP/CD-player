@@ -139,6 +139,8 @@ const songList = document.getElementById('song-list');
 const searchInput = document.getElementById('search-input');
 
 let currentSongIndex = -1;
+const playIcon = '<img width="24" height="24" src="https://img.icons8.com/android/24/play.png" alt="play"/>';
+const pauseIcon = '<img width="24" height="24" src="https://img.icons8.com/ios-filled/24/pause--v1.png" alt="pause"/>';
 
 // Populate the list of songs based on the search filter
 function loadSongsList(filter = '') {
@@ -184,12 +186,13 @@ function loadSong(index) {
 // Update background images based on the current song
 function updateBackground(imagePath) {
     const imageUrl = `url('${imagePath}')`;
-    document.body.style.backgroundImage = imageUrl;
+    // Layer album art under the gradient to keep contrast
+    document.body.style.backgroundImage =
+        `linear-gradient(135deg, rgba(11, 10, 22, 0.92), rgba(18, 13, 36, 0.9)), ${imageUrl}`;
+    document.body.style.backgroundSize = 'cover';
+    document.body.style.backgroundBlendMode = 'overlay';
     const playerContainer = document.getElementById('player-container');
-    playerContainer.style.backgroundImage = imageUrl;
-    playerContainer.style.backgroundSize = 'cover';
-    playerContainer.style.backgroundPosition = 'center';
-    playerContainer.style.backgroundBlendMode = 'overlay';
+    playerContainer.style.backgroundImage = '';
     // Also show the art on the disc itself
     cd.style.backgroundImage = imageUrl;
     cd.style.backgroundSize = 'cover';
@@ -201,14 +204,14 @@ function playSong() {
     if (currentSongIndex < 0) return;
     player.play();
     cd.classList.add('spinning');
-    playBtn.textContent = '⏸';
+    playBtn.innerHTML = pauseIcon;
 }
 
 // Pause playback and stop the disc
 function pauseSong() {
     player.pause();
     cd.classList.remove('spinning');
-    playBtn.textContent = '▶';
+    playBtn.innerHTML = playIcon;
 }
 
 // Set up button interactions
@@ -248,7 +251,7 @@ replayBtn.addEventListener('click', () => {
 // When the song ends, stop the spin and reset the play button icon
 player.addEventListener('ended', () => {
     cd.classList.remove('spinning');
-    playBtn.textContent = '▶';
+    playBtn.innerHTML = playIcon;
 });
 
 // Handle search input
