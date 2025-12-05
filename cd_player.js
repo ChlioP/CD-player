@@ -139,8 +139,8 @@ const songList = document.getElementById('song-list');
 const searchInput = document.getElementById('search-input');
 
 let currentSongIndex = -1;
-const playIcon = '<img width="24" height="24" src="https://img.icons8.com/android/24/play.png" alt="play"/>';
-const pauseIcon = '<img width="24" height="24" src="https://img.icons8.com/ios-filled/24/pause--v1.png" alt="pause"/>';
+const playIcon = '<img width="24" height="24" src="https://img.icons8.com/parakeet-line/48/play.png" alt="play"/>';
+const pauseIcon = '<img width="24" height="24" src="https://img.icons8.com/ios/50/pause--v1.png" alt="pause"/>';
 
 // Populate the list of songs based on the search filter
 function loadSongsList(filter = '') {
