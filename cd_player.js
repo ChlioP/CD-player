@@ -123,6 +123,36 @@ const songs = [
         "Em cũng thật thà cũng như người ta",
         "Dành trọn tình yêu với anh thế mà"
     ]
+    },
+    {
+    title: 'Chúng Ta Không Thuộc Về Nhau',
+    audio: 'ctktvn.mp3',
+    image: '4.jpg',
+    lyrics: [
+        "Niềm tin đã mất, giọt nước mắt cuốn kí ức anh chìm sâu",
+        "Tình về nơi đâu? Cô đơn đôi chân lạc trôi giữa bầu trời",
+        "Màn đêm che dấu, từng góc tối khuất lấp phía sau bờ môi",
+        "Tại vì anh thôi, yêu say mê nên đôi khi quá dại khờ",
+        "Nhắm mắt ơ thờ, anh không muốn lạc vào trong nỗi đau này",
+        "Phía trước bây giờ ai đang nắm chặt bàn tay của em vậy? (Em vậy)",
+        "Mông lung như một trò đùa (trò đùa), anh xin giơ tay rút lui thôi (do ai?)",
+        "Trách ai bây giờ đây? Ooh-ooh-ooh-ooh-ooh"
+    ]
+    },
+    {
+    title: 'Tiếng Pháo Giao Thừa',
+    audio: 'tet.mp3',
+    image: '5.jpg',
+    },
+    {
+    title: 'Cung Thiên Bình',
+    audio: '10.mp3',
+    image: '6.jpg',
+    },
+    {
+    title: 'Cung Thiên Bình',
+    audio: '2.mp3',
+    image: '7.jpg',
     }
 ];
 
@@ -261,8 +291,11 @@ replayBtn.addEventListener('click', () => {
 
 // When the song ends, stop the spin and reset the play button icon
 player.addEventListener('ended', () => {
-    cd.classList.remove('spinning');
-    playBtn.innerHTML = playIcon;
+    // Auto-advance to the next song, looping back to the start
+    if (songs.length === 0) return;
+    currentSongIndex = currentSongIndex < 0 ? 0 : (currentSongIndex + 1) % songs.length;
+    loadSong(currentSongIndex);
+    playSong();
 });
 
 // Handle search input
