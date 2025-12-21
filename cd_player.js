@@ -153,6 +153,15 @@ const songs = [
     title: 'Cung Thiên Bình',
     audio: '2.mp3',
     image: '7.jpg',
+    },
+    {
+    title: 'YouTube: Chill Step Mix',
+    youtubeId: 'b_0f9PDsuvQ',
+    image: 'https://img.youtube.com/vi/b_0f9PDsuvQ/hqdefault.jpg',
+    lyrics: [
+        'Added from your provided link.',
+        'Click to play; your browser might require an initial interaction.'
+    ]
     }
 ];
 
@@ -167,10 +176,17 @@ const lyricsContainer = document.getElementById('lyrics');
 const songTitle = document.getElementById('song-title');
 const songList = document.getElementById('song-list');
 const searchInput = document.getElementById('search-input');
+const youtubeTitleInput = document.getElementById('youtube-title');
+const youtubeUrlInput = document.getElementById('youtube-url');
+const addYoutubeBtn = document.getElementById('add-youtube');
 
 let currentSongIndex = -1;
 const playIcon = '<img width="24" height="24" src="https://img.icons8.com/parakeet-line/48/play.png" alt="play"/>';
 const pauseIcon = '<img width="24" height="24" src="https://img.icons8.com/ios/50/pause--v1.png" alt="pause"/>';
+let ytPlayer = null;
+let ytReady = false;
+let pendingYouTubeId = null;
+let pendingYouTubeAutoplay = false;
 
 // Populate the list of songs based on the search filter
 function loadSongsList(filter = '') {
@@ -179,7 +195,7 @@ function loadSongsList(filter = '') {
     filtered.forEach(song => {
     const div = document.createElement('div');
     div.className = 'song-item';
-    div.textContent = song.title;
+    div.textContent = song.youtubeId ? `${song.title} • YouTube` : song.title;
     div.onclick = () => {
         currentSongIndex = songs.indexOf(song);
         loadSong(currentSongIndex);
@@ -194,8 +210,27 @@ function loadSong(index) {
     const song = songs[index];
     if (!song) return;
     songTitle.textContent = song.title;
+    const art = song.image || (song.youtubeId ? `https://img.youtube.com/vi/${song.youtubeId}/hqdefault.jpg` : '');
+    updateBackground(art);
+
+    if (song.youtubeId) {
+    // Prepare the YouTube player
+    ensureYouTubePlayer();
+    player.pause();
+    pendingYouTubeAutoplay = false;
+    if (ytPlayer && ytReady) {
+        ytPlayer.loadVideoById(song.youtubeId);
+    } else {
+        pendingYouTubeId = song.youtubeId;
+    }
+    } else {
+    // Local file
+    if (ytPlayer && ytReady) {
+        ytPlayer.stopVideo();
+    }
     player.src = song.audio;
-    updateBackground(song.image);
+    }
+
     // Build the lyrics lines
     lyricsContainer.innerHTML = '';
     if (!song.lyrics || song.lyrics.length === 0) {
@@ -240,33 +275,117 @@ function updateBackground(imagePath) {
     cd.style.backgroundPosition = 'center';
 }
 
+// Load the YouTube iframe API if needed and spin up a hidden player
+function ensureYouTubePlayer() {
+    if (ytPlayer || ytReady) return;
+    if (!document.getElementById('youtube-iframe-script')) {
+    const tag = document.createElement('script');
+    tag.id = 'youtube-iframe-script';
+    tag.src = 'https://www.youtube.com/iframe_api';
+    document.body.appendChild(tag);
+    }
+}
+
+// YouTube API callback (must be on window)
+window.onYouTubeIframeAPIReady = () => {
+    ytPlayer = new YT.Player('youtube-player', {
+    height: '0',
+    width: '0',
+    playerVars: { controls: 0, modestbranding: 1, rel: 0, playsinline: 1 },
+    events: {
+        onReady: () => {
+        ytReady = true;
+        ytPlayer.unMute();
+        ytPlayer.setVolume(100);
+        if (pendingYouTubeId) {
+            ytPlayer.loadVideoById(pendingYouTubeId);
+            if (pendingYouTubeAutoplay) {
+            ytPlayer.playVideo();
+            setPlayingUI(true);
+            }
+            pendingYouTubeId = null;
+            pendingYouTubeAutoplay = false;
+        }
+        },
+        onStateChange: handleYouTubeStateChange
+    }
+    });
+};
+
+function handleYouTubeStateChange(event) {
+    if (!event || !event.data || !window.YT) return;
+    if (event.data === YT.PlayerState.PLAYING) {
+    setPlayingUI(true);
+    } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.CUED) {
+    setPlayingUI(false);
+    } else if (event.data === YT.PlayerState.ENDED) {
+    advanceSong();
+    }
+}
+
+function setPlayingUI(isPlaying) {
+    if (isPlaying) {
+    cd.classList.add('spinning');
+    playBtn.innerHTML = pauseIcon;
+    } else {
+    cd.classList.remove('spinning');
+    playBtn.innerHTML = playIcon;
+    }
+}
+
+function isYouTubePlaying() {
+    if (!ytPlayer || !ytReady || typeof window.YT === 'undefined' || !YT.PlayerState) return false;
+    return ytPlayer.getPlayerState && ytPlayer.getPlayerState() === YT.PlayerState.PLAYING;
+}
+
+function advanceSong() {
+    if (songs.length === 0) return;
+    currentSongIndex = currentSongIndex < 0 ? 0 : (currentSongIndex + 1) % songs.length;
+    loadSong(currentSongIndex);
+    playSong();
+}
+
 // Start playback and spin the disc
 function playSong() {
     if (currentSongIndex < 0) return;
+    const song = songs[currentSongIndex];
+    if (song.youtubeId) {
+    if (ytPlayer && ytReady) {
+        ytPlayer.loadVideoById(song.youtubeId);
+        ytPlayer.playVideo();
+        setPlayingUI(true);
+    } else {
+        pendingYouTubeId = song.youtubeId;
+        pendingYouTubeAutoplay = true;
+        ensureYouTubePlayer();
+    }
+    } else {
     player.play();
-    cd.classList.add('spinning');
-    playBtn.innerHTML = pauseIcon;
+    setPlayingUI(true);
+    }
 }
 
 // Pause playback and stop the disc
 function pauseSong() {
+    const song = songs[currentSongIndex];
+    if (song && song.youtubeId && ytPlayer && ytReady) {
+    ytPlayer.pauseVideo();
+    } else {
     player.pause();
-    cd.classList.remove('spinning');
-    playBtn.innerHTML = playIcon;
+    }
+    setPlayingUI(false);
 }
 
 // Set up button interactions
 playBtn.addEventListener('click', () => {
-    if (player.paused) {
-    // If nothing has been loaded yet, load the first song by default
-    if (currentSongIndex < 0) {
-        currentSongIndex = 0;
-        loadSong(0);
+    if (currentSongIndex < 0 && songs.length > 0) {
+    currentSongIndex = 0;
+    loadSong(0);
     }
-    playSong();
-    } else {
-    pauseSong();
-    }
+    const song = songs[currentSongIndex];
+    const shouldPlay = song && song.youtubeId ? !isYouTubePlaying() : player.paused;
+    if (shouldPlay) playSong();
+    else pauseSong();
 });
 
 nextBtn.addEventListener('click', () => {
@@ -285,23 +404,59 @@ prevBtn.addEventListener('click', () => {
 
 replayBtn.addEventListener('click', () => {
     if (currentSongIndex < 0) return;
+    const song = songs[currentSongIndex];
+    if (song.youtubeId && ytPlayer && ytReady) {
+    ytPlayer.seekTo(0);
+    playSong();
+    } else {
     player.currentTime = 0;
     playSong();
+    }
 });
 
 // When the song ends, stop the spin and reset the play button icon
 player.addEventListener('ended', () => {
-    // Auto-advance to the next song, looping back to the start
-    if (songs.length === 0) return;
-    currentSongIndex = currentSongIndex < 0 ? 0 : (currentSongIndex + 1) % songs.length;
-    loadSong(currentSongIndex);
-    playSong();
+    advanceSong();
 });
+
+player.addEventListener('play', () => setPlayingUI(true));
+player.addEventListener('pause', () => setPlayingUI(false));
 
 // Handle search input
 searchInput.addEventListener('input', e => {
     loadSongsList(e.target.value);
 });
+
+// Allow users to add YouTube links to the list
+addYoutubeBtn.addEventListener('click', () => {
+    const url = youtubeUrlInput.value.trim();
+    const title = youtubeTitleInput.value.trim();
+    const id = parseYouTubeId(url);
+    if (!id) {
+    alert('Please paste a valid YouTube link.');
+    return;
+    }
+    const songTitleText = title || 'YouTube track';
+    songs.push({
+    title: songTitleText,
+    youtubeId: id,
+    image: `https://img.youtube.com/vi/${id}/hqdefault.jpg`,
+    lyrics: ['User added track from YouTube.']
+    });
+    youtubeUrlInput.value = '';
+    youtubeTitleInput.value = '';
+    currentSongIndex = songs.length - 1;
+    loadSongsList(searchInput.value);
+    loadSong(currentSongIndex);
+    playSong();
+});
+
+function parseYouTubeId(url) {
+    // Supports full, short and embed links
+    const regex = /(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([\w-]{11})/;
+    const match = url.match(regex);
+    return match ? match[1] : null;
+}
 
 // Populate the list the first time
 loadSongsList();

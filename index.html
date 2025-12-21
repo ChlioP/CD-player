@@ -13,6 +13,11 @@
     <div id="search-bar">
       <input type="text" id="search-input" placeholder="Search for a song...">
     </div>
+    <div id="youtube-add">
+      <input type="text" id="youtube-title" placeholder="Title (optional)">
+      <input type="text" id="youtube-url" placeholder="Paste a YouTube link to add it">
+      <button id="add-youtube">Add YouTube Track</button>
+    </div>
     <div id="song-list"></div>
     <div id="main">
       <div id="cd-wrapper">
@@ -40,6 +45,9 @@
   </div>
   <!-- Hidden audio element used for playback -->
   <audio id="audio-player"></audio>
+  <div id="youtube-player-shell">
+    <div id="youtube-player"></div>
+  </div>
 
   <script src="cd_player.js"></script>
 </body>

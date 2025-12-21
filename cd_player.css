@@ -65,6 +65,44 @@ body {
     box-shadow: inset 0 0 12px rgba(124, 42, 232, 0.2);
 }
 
+/* Quick add area for YouTube tracks */
+#youtube-add {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 8px;
+    margin: 10px 0 14px;
+}
+#youtube-add input {
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(124, 42, 232, 0.45);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--frost);
+    font-family: 'Space Grotesk', sans-serif;
+}
+#add-youtube {
+    background: linear-gradient(135deg, rgba(124, 42, 232, 0.9), rgba(185, 120, 255, 0.95));
+    border: none;
+    color: #0b0716;
+    border-radius: 10px;
+    padding: 0 14px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 0 12px rgba(185, 120, 255, 0.5);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+#add-youtube:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0 16px rgba(197, 133, 255, 0.8);
+}
+
+/* Hidden YouTube player (used only for audio control) */
+#youtube-player-shell {
+    width: 0;
+    height: 0;
+    overflow: hidden;
+}
+
 /* List of songs returned from the search */
 #song-list {
     max-height: 150px;
@@ -229,11 +267,14 @@ body {
         height: 165px;
     }
     #lyrics-container {
-        width: 100%;
-        height: 240px;
+    width: 100%;
+    height: 240px;
     }
     #lyrics {
         font-size: 16px;
+    }
+    #youtube-add {
+        grid-template-columns: 1fr;
     }
     #controls {
         display: flex;
