@@ -452,8 +452,17 @@ addYoutubeBtn.addEventListener('click', () => {
 });
 
 function parseYouTubeId(url) {
-    // Supports full, short and embed links
-    const regex = /(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([\w-]{11})/;
+    // Robustly extract ID from common formats: watch?v=, short youtu.be, embed/, shorts/, with extra params
+    try {
+    const parsed = new URL(url);
+    if (parsed.searchParams.get('v')) return parsed.searchParams.get('v');
+    const parts = parsed.pathname.split('/');
+    const candidate = parts.pop() || parts.pop(); // handle trailing slash
+    if (candidate && candidate.length === 11) return candidate;
+    } catch (e) {
+    // not a full URL, fall back to regex
+    }
+    const regex = /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{11})/;
     const match = url.match(regex);
     return match ? match[1] : null;
 }
