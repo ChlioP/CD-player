@@ -195,7 +195,22 @@ function loadSongsList(filter = '') {
     filtered.forEach(song => {
     const div = document.createElement('div');
     div.className = 'song-item';
-    div.textContent = song.youtubeId ? `${song.title} • YouTube` : song.title;
+    const titleSpan = document.createElement('div');
+    titleSpan.className = 'song-title';
+    titleSpan.textContent = song.youtubeId ? `${song.title} • YouTube` : song.title;
+    div.appendChild(titleSpan);
+
+    if (song.youtubeId) {
+        const del = document.createElement('button');
+        del.className = 'delete-youtube';
+        del.textContent = 'Delete';
+        del.onclick = e => {
+        e.stopPropagation();
+        deleteSong(song);
+        };
+        div.appendChild(del);
+    }
+
     div.onclick = () => {
         currentSongIndex = songs.indexOf(song);
         loadSong(currentSongIndex);
@@ -465,6 +480,28 @@ function parseYouTubeId(url) {
     const regex = /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{11})/;
     const match = url.match(regex);
     return match ? match[1] : null;
+}
+
+// Remove a song (YouTube only) from the list
+function deleteSong(song) {
+    const index = songs.indexOf(song);
+    if (index === -1) return;
+    // If deleting the currently playing song, stop playback and reset UI
+    if (index === currentSongIndex) {
+    pauseSong();
+    player.src = '';
+    if (ytPlayer && ytReady) {
+        ytPlayer.stopVideo();
+    }
+    songTitle.textContent = 'Select a song';
+    lyricsContainer.innerHTML = '';
+    cd.style.backgroundImage = '';
+    currentSongIndex = -1;
+    } else if (index < currentSongIndex) {
+    currentSongIndex -= 1; // shift back since array shrinks
+    }
+    songs.splice(index, 1);
+    loadSongsList(searchInput.value);
 }
 
 // Populate the list the first time
